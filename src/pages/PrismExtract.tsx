@@ -74,7 +74,7 @@ export default function PrismExtract() {
       
       toast({
         title: 'Success!',
-        description: `Extracted ${extractedColors.length} colors from your image`
+        description: 'Extracted 6 dominant colors from your image'
       });
     } catch (error) {
       console.error('Error processing image:', error);
@@ -182,7 +182,7 @@ export default function PrismExtract() {
             <h1 className="text-3xl font-bold text-foreground">Prism-Extract</h1>
           </div>
           <p className="text-center text-muted-foreground mt-2">
-            Extract colors from images and create beautiful CSS gradients
+            Extract the top 6 colors from images and create beautiful CSS gradients
           </p>
         </div>
       </header>

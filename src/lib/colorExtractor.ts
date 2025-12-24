@@ -40,6 +40,9 @@ function colorDistance(c1: RGB, c2: RGB): number {
 
 /**
  * Extract dominant colors from an image using median cut algorithm
+ * @param imageFile - The image file to process
+ * @param colorCount - Number of colors to extract (default: 6)
+ * @returns Promise resolving to an array of exactly colorCount colors
  */
 export async function extractColors(
   imageFile: File,
@@ -84,10 +87,15 @@ export async function extractColors(
           }
 
           // Apply median cut algorithm
-          const colors = medianCut(pixels, colorCount);
+          // Calculate depth: 2^depth = colorCount, so depth = log2(colorCount)
+          const depth = Math.ceil(Math.log2(colorCount));
+          const colors = medianCut(pixels, depth);
+          
+          // Ensure we have exactly the requested number of colors
+          const finalColors = colors.slice(0, colorCount);
           
           // Convert to ColorInfo format
-          const colorInfos: ColorInfo[] = colors.map((color, index) => ({
+          const colorInfos: ColorInfo[] = finalColors.map((color, index) => ({
             id: crypto.randomUUID(),
             rgb: color,
             hex: rgbToHex(color.r, color.g, color.b),
