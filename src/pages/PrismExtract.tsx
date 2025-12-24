@@ -1,4 +1,4 @@
-import { Check, Copy, Image as ImageIcon, Palette, Sparkles, Upload, Wand2 } from 'lucide-react';
+import { Check, Copy, Image as ImageIcon, Palette, Upload, Wand2 } from 'lucide-react';
 import React, { useMemo, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -207,13 +207,12 @@ export default function PrismExtract() {
       {/* Modern Header */}
       <header className="border-b border-border/50 bg-card/50 backdrop-blur-xl">
         <div className="container mx-auto px-6 py-8">
-          <div className="flex items-center justify-center gap-3 mb-3">
-            <div className="p-3 bg-gradient-to-br from-primary to-primary/70 rounded-3xl soft-shadow">
-              <Sparkles className="w-7 h-7 text-white" />
-            </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-              Prism-Extract
-            </h1>
+          <div className="flex items-center justify-center gap-4 mb-3">
+            <img 
+              src="/prism_logo.png" 
+              alt="Prism Extract Logo" 
+              className="h-16 w-auto"
+            />
           </div>
           <p className="text-center text-muted-foreground text-lg">
             Extract colors from images and create beautiful CSS gradients
