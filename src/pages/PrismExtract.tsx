@@ -18,6 +18,7 @@ export default function PrismExtract() {
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [copied, setCopied] = useState(false);
   const [colorCount, setColorCount] = useState<number>(6);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -34,6 +35,29 @@ export default function PrismExtract() {
       setSelectedColors(new Set(colors.map(c => c.id)));
     }
   }, [colors]);
+
+  // Re-extract colors when colorCount changes (if image is uploaded)
+  React.useEffect(() => {
+    if (uploadedFile && !isProcessing) {
+      const extractColorsFromFile = async () => {
+        setIsProcessing(true);
+        try {
+          const extractedColors = await extractColors(uploadedFile, colorCount);
+          setColors(extractedColors);
+        } catch (error) {
+          console.error('Error re-extracting colors:', error);
+          toast({
+            title: 'Processing Error',
+            description: 'Failed to extract colors from the image',
+            variant: 'destructive'
+          });
+        } finally {
+          setIsProcessing(false);
+        }
+      };
+      extractColorsFromFile();
+    }
+  }, [colorCount, uploadedFile, toast]);
 
   // Generate gradient CSS
   const gradientCSS = useMemo(() => {
@@ -68,6 +92,7 @@ export default function PrismExtract() {
       // Create preview URL
       const imageUrl = URL.createObjectURL(file);
       setUploadedImage(imageUrl);
+      setUploadedFile(file);
 
       // Extract colors
       const extractedColors = await extractColors(file, colorCount);
@@ -170,6 +195,7 @@ export default function PrismExtract() {
     setSelectedColors(new Set());
     setStops([]);
     setUploadedImage(null);
+    setUploadedFile(null);
     setCopied(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -210,39 +236,6 @@ export default function PrismExtract() {
                   <h2 className="text-xl font-semibold">Upload Image</h2>
                 </div>
 
-                {/* Color Count Selector */}
-                <div className="mb-6 space-y-3">
-                  <Label className="text-sm font-medium">Number of Colors to Extract</Label>
-                  <div className="flex items-center gap-4">
-                    <Slider
-                      value={[colorCount]}
-                      onValueChange={(value) => setColorCount(value[0])}
-                      min={3}
-                      max={12}
-                      step={1}
-                      className="flex-1"
-                    />
-                    <div className="w-16 text-center">
-                      <Input
-                        type="number"
-                        value={colorCount}
-                        onChange={(e) => {
-                          const val = Number(e.target.value);
-                          if (val >= 3 && val <= 12) {
-                            setColorCount(val);
-                          }
-                        }}
-                        min={3}
-                        max={12}
-                        className="text-center rounded-xl"
-                      />
-                    </div>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Choose between 3 and 12 colors
-                  </p>
-                </div>
-                
                 <div
                   className={`relative border-2 border-dashed rounded-3xl p-12 transition-all duration-300 cursor-pointer ${
                     isDragging
@@ -310,8 +303,43 @@ export default function PrismExtract() {
                     </div>
                     <h2 className="text-xl font-semibold">Extracted Colors</h2>
                   </div>
+
+                  {/* Color Count Selector */}
+                  <div className="mb-6 space-y-3">
+                    <Label className="text-sm font-medium">Number of Colors</Label>
+                    <div className="flex items-center gap-4">
+                      <Slider
+                        value={[colorCount]}
+                        onValueChange={(value) => setColorCount(value[0])}
+                        min={3}
+                        max={12}
+                        step={1}
+                        className="flex-1"
+                        disabled={isProcessing}
+                      />
+                      <div className="w-16 text-center">
+                        <Input
+                          type="number"
+                          value={colorCount}
+                          onChange={(e) => {
+                            const val = Number(e.target.value);
+                            if (val >= 3 && val <= 12) {
+                              setColorCount(val);
+                            }
+                          }}
+                          min={3}
+                          max={12}
+                          disabled={isProcessing}
+                          className="text-center rounded-xl"
+                        />
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {isProcessing ? 'Extracting colors...' : 'Adjust to re-extract colors (3-12)'}
+                    </p>
+                  </div>
                   
-                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
+                  <div className={`grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 transition-opacity ${isProcessing ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
                     {colors.map((color) => {
                       const isSelected = selectedColors.has(color.id);
                       return (
