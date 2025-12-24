@@ -1,5 +1,5 @@
-import SamplePage from './pages/SamplePage';
 import type { ReactNode } from 'react';
+import PrismExtract from './pages/PrismExtract';
 
 interface RouteConfig {
   name: string;
@@ -10,9 +10,9 @@ interface RouteConfig {
 
 const routes: RouteConfig[] = [
   {
-    name: 'Sample Page',
+    name: 'Prism Extract',
     path: '/',
-    element: <SamplePage />
+    element: <PrismExtract />
   }
 ];
 
