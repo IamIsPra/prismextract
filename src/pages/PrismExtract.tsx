@@ -54,8 +54,8 @@ export default function PrismExtract() {
     // Validate file type
     if (!file.type.startsWith('image/')) {
       toast({
-        title: '无效文件',
-        description: '请上传图片文件（JPG、PNG、GIF 或 WebP）',
+        title: 'Invalid File',
+        description: 'Please upload an image file (JPG, PNG, GIF, or WebP)',
         variant: 'destructive'
       });
       return;
@@ -73,14 +73,14 @@ export default function PrismExtract() {
       setColors(extractedColors);
       
       toast({
-        title: '成功！',
-        description: '已从图片中提取 6 种主要颜色'
+        title: 'Success!',
+        description: 'Extracted 6 dominant colors from your image'
       });
     } catch (error) {
       console.error('Error processing image:', error);
       toast({
-        title: '处理错误',
-        description: '无法从图片中提取颜色',
+        title: 'Processing Error',
+        description: 'Failed to extract colors from the image',
         variant: 'destructive'
       });
     } finally {
@@ -157,8 +157,8 @@ export default function PrismExtract() {
     navigator.clipboard.writeText(`background: ${gradientCSS};`);
     setCopied(true);
     toast({
-      title: '已复制！',
-      description: 'CSS 代码已复制到剪贴板'
+      title: 'Copied!',
+      description: 'CSS code copied to clipboard'
     });
     setTimeout(() => setCopied(false), 2000);
   };
@@ -189,7 +189,7 @@ export default function PrismExtract() {
             </h1>
           </div>
           <p className="text-center text-muted-foreground text-lg">
-            提取图片中的前 6 种颜色，创建精美的 CSS 渐变
+            Extract the top 6 colors from images and create beautiful CSS gradients
           </p>
         </div>
       </header>
@@ -206,7 +206,7 @@ export default function PrismExtract() {
                   <div className="p-2 bg-primary/10 rounded-2xl">
                     <ImageIcon className="w-5 h-5 text-primary" />
                   </div>
-                  <h2 className="text-xl font-semibold">上传图片</h2>
+                  <h2 className="text-xl font-semibold">Upload Image</h2>
                 </div>
                 
                 <div
@@ -245,7 +245,7 @@ export default function PrismExtract() {
                             handleReset();
                           }}
                         >
-                          更换图片
+                          Change Image
                         </Button>
                       </div>
                     </div>
@@ -255,10 +255,10 @@ export default function PrismExtract() {
                         <Upload className="w-12 h-12 text-primary" />
                       </div>
                       <p className="text-lg text-foreground font-semibold mb-2">
-                        {isProcessing ? '处理中...' : '点击上传或拖拽图片'}
+                        {isProcessing ? 'Processing...' : 'Click to upload or drag and drop'}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        支持 JPG、PNG、GIF 和 WebP 格式
+                        Supports JPG, PNG, GIF, and WebP formats
                       </p>
                     </div>
                   )}
@@ -274,7 +274,7 @@ export default function PrismExtract() {
                     <div className="p-2 bg-primary/10 rounded-2xl">
                       <Palette className="w-5 h-5 text-primary" />
                     </div>
-                    <h2 className="text-xl font-semibold">提取的颜色</h2>
+                    <h2 className="text-xl font-semibold">Extracted Colors</h2>
                   </div>
                   
                   <div className="grid grid-cols-3 gap-4">
@@ -324,7 +324,7 @@ export default function PrismExtract() {
                     <div className="p-2 bg-primary/10 rounded-2xl">
                       <Wand2 className="w-5 h-5 text-primary" />
                     </div>
-                    <h2 className="text-xl font-semibold">渐变预览</h2>
+                    <h2 className="text-xl font-semibold">Gradient Preview</h2>
                   </div>
                   
                   <div
@@ -336,8 +336,8 @@ export default function PrismExtract() {
                     <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
                     <div className="absolute bottom-6 left-6 right-6">
                       <div className="bg-black/20 backdrop-blur-md rounded-2xl p-4">
-                        <p className="text-white/90 text-sm font-medium">点击调整角度</p>
-                        <p className="text-white/70 text-xs mt-1">当前角度: {angle}°</p>
+                        <p className="text-white/90 text-sm font-medium">Click to adjust angle</p>
+                        <p className="text-white/70 text-xs mt-1">Current angle: {angle}°</p>
                       </div>
                     </div>
                   </div>
@@ -351,13 +351,13 @@ export default function PrismExtract() {
                 <CardContent className="p-8">
                   <Tabs defaultValue="basic" className="w-full">
                     <TabsList className="grid w-full grid-cols-2 rounded-2xl p-1 bg-muted/50">
-                      <TabsTrigger value="basic" className="rounded-xl">基础</TabsTrigger>
-                      <TabsTrigger value="advanced" className="rounded-xl">高级</TabsTrigger>
+                      <TabsTrigger value="basic" className="rounded-xl">Basic</TabsTrigger>
+                      <TabsTrigger value="advanced" className="rounded-xl">Advanced</TabsTrigger>
                     </TabsList>
                     
                     <TabsContent value="basic" className="space-y-6 mt-6">
                       <div className="space-y-3">
-                        <Label className="text-base font-medium">角度</Label>
+                        <Label className="text-base font-medium">Angle</Label>
                         <div className="flex items-center gap-4">
                           <Slider
                             value={[angle]}
@@ -428,7 +428,7 @@ export default function PrismExtract() {
                       <div className="p-2 bg-primary/10 rounded-2xl">
                         <Copy className="w-5 h-5 text-primary" />
                       </div>
-                      <h2 className="text-xl font-semibold">CSS 代码</h2>
+                      <h2 className="text-xl font-semibold">CSS Code</h2>
                     </div>
                     <Button
                       onClick={handleCopyCSS}
@@ -438,12 +438,12 @@ export default function PrismExtract() {
                       {copied ? (
                         <>
                           <Check className="w-4 h-4 mr-2" />
-                          已复制
+                          Copied
                         </>
                       ) : (
                         <>
                           <Copy className="w-4 h-4 mr-2" />
-                          复制代码
+                          Copy Code
                         </>
                       )}
                     </Button>
