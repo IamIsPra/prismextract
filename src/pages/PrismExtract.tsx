@@ -1,9 +1,8 @@
-import { Copy, Palette, RotateCw, Upload, X } from 'lucide-react';
+import { Check, Copy, Image as ImageIcon, Palette, Sparkles, Upload, Wand2 } from 'lucide-react';
 import React, { useMemo, useRef, useState } from 'react';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
@@ -19,6 +18,7 @@ export default function PrismExtract() {
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -54,8 +54,8 @@ export default function PrismExtract() {
     // Validate file type
     if (!file.type.startsWith('image/')) {
       toast({
-        title: 'Invalid File',
-        description: 'Please upload an image file (JPG, PNG, GIF, or WebP)',
+        title: '无效文件',
+        description: '请上传图片文件（JPG、PNG、GIF 或 WebP）',
         variant: 'destructive'
       });
       return;
@@ -73,14 +73,14 @@ export default function PrismExtract() {
       setColors(extractedColors);
       
       toast({
-        title: 'Success!',
-        description: 'Extracted 6 dominant colors from your image'
+        title: '成功！',
+        description: '已从图片中提取 6 种主要颜色'
       });
     } catch (error) {
       console.error('Error processing image:', error);
       toast({
-        title: 'Processing Error',
-        description: 'Failed to extract colors from the image',
+        title: '处理错误',
+        description: '无法从图片中提取颜色',
         variant: 'destructive'
       });
     } finally {
@@ -104,55 +104,47 @@ export default function PrismExtract() {
     setIsDragging(false);
     
     const file = e.dataTransfer.files[0];
-    handleFileChange(file);
+    if (file) {
+      handleFileChange(file);
+    }
   };
 
-  // Handle click to upload
+  // Handle upload click
   const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
 
   // Toggle color selection
   const toggleColor = (colorId: string) => {
-    const newSelected = new Set(selectedColors);
-    if (newSelected.has(colorId)) {
-      if (newSelected.size > 1) {
-        newSelected.delete(colorId);
+    setSelectedColors(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(colorId)) {
+        if (newSet.size > 1) {
+          newSet.delete(colorId);
+        }
+      } else {
+        newSet.add(colorId);
       }
-    } else {
-      newSelected.add(colorId);
-    }
-    setSelectedColors(newSelected);
+      return newSet;
+    });
   };
 
-  // Copy gradient CSS to clipboard
-  const copyToClipboard = async () => {
-    if (!gradientCSS) return;
-    
-    try {
-      await navigator.clipboard.writeText(`background: ${gradientCSS};`);
-      toast({
-        title: 'Copied!',
-        description: 'Gradient CSS copied to clipboard'
-      });
-    } catch (error) {
-      toast({
-        title: 'Copy Failed',
-        description: 'Failed to copy to clipboard',
-        variant: 'destructive'
-      });
-    }
+  // Update stop position
+  const updateStop = (index: number, value: number) => {
+    setStops(prev => {
+      const newStops = [...prev];
+      newStops[index] = value;
+      return newStops;
+    });
   };
 
-  // Handle preview click for angle adjustment
+  // Handle preview click to adjust angle
   const handlePreviewClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!previewRef.current) return;
     
     const rect = previewRef.current.getBoundingClientRect();
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const x = e.clientX - rect.left - centerX;
-    const y = e.clientY - rect.top - centerY;
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top - rect.height / 2;
     
     let newAngle = Math.atan2(y, x) * (180 / Math.PI) + 90;
     if (newAngle < 0) newAngle += 360;
@@ -160,52 +152,68 @@ export default function PrismExtract() {
     setAngle(Math.round(newAngle));
   };
 
-  // Reset all
+  // Copy CSS to clipboard
+  const handleCopyCSS = () => {
+    navigator.clipboard.writeText(`background: ${gradientCSS};`);
+    setCopied(true);
+    toast({
+      title: '已复制！',
+      description: 'CSS 代码已复制到剪贴板'
+    });
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  // Reset everything
   const handleReset = () => {
     setColors([]);
     setSelectedColors(new Set());
-    setAngle(90);
     setStops([]);
     setUploadedImage(null);
+    setCopied(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-center gap-3">
-            <Palette className="w-8 h-8 text-primary" />
-            <h1 className="text-3xl font-bold text-foreground">Prism-Extract</h1>
+    <div className="min-h-screen bg-gradient-to-br from-background via-accent/20 to-background">
+      {/* Modern Header */}
+      <header className="border-b border-border/50 bg-card/50 backdrop-blur-xl">
+        <div className="container mx-auto px-6 py-8">
+          <div className="flex items-center justify-center gap-3 mb-3">
+            <div className="p-3 bg-gradient-to-br from-primary to-primary/70 rounded-3xl soft-shadow">
+              <Sparkles className="w-7 h-7 text-white" />
+            </div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+              Prism-Extract
+            </h1>
           </div>
-          <p className="text-center text-muted-foreground mt-2">
-            Extract the top 6 colors from images and create beautiful CSS gradients
+          <p className="text-center text-muted-foreground text-lg">
+            提取图片中的前 6 种颜色，创建精美的 CSS 渐变
           </p>
         </div>
       </header>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+      <div className="container mx-auto px-6 py-12">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
           {/* Left Column: Upload & Palette */}
-          <div className="space-y-6">
+          <div className="space-y-8">
             {/* Upload Area */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Upload Image</CardTitle>
-                <CardDescription>
-                  Drag and drop or click to select an image (JPG, PNG, GIF, WebP)
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
+            <Card className="border-0 soft-shadow-lg rounded-3xl overflow-hidden">
+              <CardContent className="p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 bg-primary/10 rounded-2xl">
+                    <ImageIcon className="w-5 h-5 text-primary" />
+                  </div>
+                  <h2 className="text-xl font-semibold">上传图片</h2>
+                </div>
+                
                 <div
-                  className={`relative border-2 border-dashed rounded-lg p-8 transition-all duration-200 cursor-pointer ${
+                  className={`relative border-2 border-dashed rounded-3xl p-12 transition-all duration-300 cursor-pointer ${
                     isDragging
-                      ? 'border-primary bg-accent'
-                      : 'border-border hover:border-primary hover:bg-accent/50'
+                      ? 'border-primary bg-primary/5 scale-[0.98]'
+                      : 'border-border hover:border-primary/50 hover:bg-accent/30'
                   }`}
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
@@ -221,32 +229,36 @@ export default function PrismExtract() {
                   />
                   
                   {uploadedImage ? (
-                    <div className="relative">
+                    <div className="relative group">
                       <img
                         src={uploadedImage}
                         alt="Uploaded"
-                        className="w-full h-48 object-cover rounded-lg"
+                        className="w-full h-64 object-cover rounded-2xl"
                       />
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        className="absolute top-2 right-2"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleReset();
-                        }}
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl flex items-center justify-center">
+                        <Button
+                          variant="secondary"
+                          size="lg"
+                          className="rounded-full"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleReset();
+                          }}
+                        >
+                          更换图片
+                        </Button>
+                      </div>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center text-center">
-                      <Upload className="w-12 h-12 text-muted-foreground mb-4" />
-                      <p className="text-sm text-foreground font-medium mb-1">
-                        {isProcessing ? 'Processing...' : 'Click to upload or drag and drop'}
+                      <div className="p-6 bg-primary/10 rounded-full mb-6">
+                        <Upload className="w-12 h-12 text-primary" />
+                      </div>
+                      <p className="text-lg text-foreground font-semibold mb-2">
+                        {isProcessing ? '处理中...' : '点击上传或拖拽图片'}
                       </p>
-                      <p className="text-xs text-muted-foreground">
-                        Supports JPG, PNG, GIF, and WebP
+                      <p className="text-sm text-muted-foreground">
+                        支持 JPG、PNG、GIF 和 WebP 格式
                       </p>
                     </div>
                   )}
@@ -256,155 +268,151 @@ export default function PrismExtract() {
 
             {/* Color Palette */}
             {colors.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Extracted Colors</CardTitle>
-                  <CardDescription>
-                    Click to toggle colors in the gradient
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
+              <Card className="border-0 soft-shadow-lg rounded-3xl overflow-hidden">
+                <CardContent className="p-8">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-primary/10 rounded-2xl">
+                      <Palette className="w-5 h-5 text-primary" />
+                    </div>
+                    <h2 className="text-xl font-semibold">提取的颜色</h2>
+                  </div>
+                  
                   <div className="grid grid-cols-3 gap-4">
-                    {colors.map((color) => (
-                      <button
-                        key={color.id}
-                        onClick={() => toggleColor(color.id)}
-                        className={`group relative aspect-square rounded-lg overflow-hidden transition-all duration-200 ${
-                          selectedColors.has(color.id)
-                            ? 'ring-4 ring-primary scale-105'
-                            : 'ring-2 ring-border hover:ring-primary/50'
-                        }`}
-                        style={{ backgroundColor: color.hex }}
-                      >
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors">
-                          <Badge
-                            variant="secondary"
-                            className="opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            {color.hex}
-                          </Badge>
-                        </div>
-                      </button>
-                    ))}
+                    {colors.map((color) => {
+                      const isSelected = selectedColors.has(color.id);
+                      return (
+                        <button
+                          key={color.id}
+                          type="button"
+                          onClick={() => toggleColor(color.id)}
+                          className={`group relative aspect-square rounded-2xl transition-all duration-300 ${
+                            isSelected 
+                              ? 'scale-100 soft-shadow' 
+                              : 'scale-95 opacity-50 hover:opacity-75'
+                          }`}
+                          style={{ backgroundColor: color.hex }}
+                        >
+                          <div className="absolute inset-0 rounded-2xl border-4 border-white/20" />
+                          {isSelected && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="p-2 bg-white/90 rounded-full">
+                                <Check className="w-5 h-5 text-primary" />
+                              </div>
+                            </div>
+                          )}
+                          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Badge variant="secondary" className="text-xs font-mono rounded-full">
+                              {color.hex}
+                            </Badge>
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>
             )}
           </div>
 
-          {/* Right Column: Preview & Controls */}
-          <div className="space-y-6">
+          {/* Right Column: Gradient Preview & Controls */}
+          <div className="space-y-8">
             {/* Gradient Preview */}
             {colors.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Gradient Preview</CardTitle>
-                  <CardDescription>
-                    Click on the preview to adjust the gradient angle
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
+              <Card className="border-0 soft-shadow-lg rounded-3xl overflow-hidden">
+                <CardContent className="p-8">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-primary/10 rounded-2xl">
+                      <Wand2 className="w-5 h-5 text-primary" />
+                    </div>
+                    <h2 className="text-xl font-semibold">渐变预览</h2>
+                  </div>
+                  
                   <div
                     ref={previewRef}
-                    className="w-full h-64 rounded-lg shadow-lg cursor-crosshair transition-all duration-200"
+                    className="w-full h-80 rounded-3xl soft-shadow-lg cursor-pointer transition-transform hover:scale-[0.98] relative overflow-hidden"
                     style={{ background: gradientCSS }}
                     onClick={handlePreviewClick}
-                  />
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
+                    <div className="absolute bottom-6 left-6 right-6">
+                      <div className="bg-black/20 backdrop-blur-md rounded-2xl p-4">
+                        <p className="text-white/90 text-sm font-medium">点击调整角度</p>
+                        <p className="text-white/70 text-xs mt-1">当前角度: {angle}°</p>
+                      </div>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             )}
 
             {/* Controls */}
             {colors.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Gradient Controls</CardTitle>
-                </CardHeader>
-                <CardContent>
+              <Card className="border-0 soft-shadow-lg rounded-3xl overflow-hidden">
+                <CardContent className="p-8">
                   <Tabs defaultValue="basic" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="basic">Basic</TabsTrigger>
-                      <TabsTrigger value="advanced">Advanced</TabsTrigger>
+                    <TabsList className="grid w-full grid-cols-2 rounded-2xl p-1 bg-muted/50">
+                      <TabsTrigger value="basic" className="rounded-xl">基础</TabsTrigger>
+                      <TabsTrigger value="advanced" className="rounded-xl">高级</TabsTrigger>
                     </TabsList>
                     
                     <TabsContent value="basic" className="space-y-6 mt-6">
-                      {/* Angle Control */}
                       <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <Label>Angle</Label>
-                          <div className="flex items-center gap-2">
+                        <Label className="text-base font-medium">角度</Label>
+                        <div className="flex items-center gap-4">
+                          <Slider
+                            value={[angle]}
+                            onValueChange={(value) => setAngle(value[0])}
+                            min={0}
+                            max={360}
+                            step={1}
+                            className="flex-1"
+                          />
+                          <div className="w-20">
                             <Input
                               type="number"
-                              min="0"
-                              max="360"
                               value={angle}
                               onChange={(e) => setAngle(Number(e.target.value))}
-                              className="w-20 text-right"
+                              min={0}
+                              max={360}
+                              className="text-center rounded-xl"
                             />
-                            <span className="text-sm text-muted-foreground">°</span>
                           </div>
                         </div>
-                        <Slider
-                          value={[angle]}
-                          onValueChange={(value) => setAngle(value[0])}
-                          min={0}
-                          max={360}
-                          step={1}
-                          className="w-full"
-                        />
                       </div>
                     </TabsContent>
                     
-                    <TabsContent value="advanced" className="space-y-4 mt-6">
-                      <Accordion type="single" collapsible className="w-full">
-                        {colors.filter(c => selectedColors.has(c.id)).map((color, index) => (
-                          <AccordionItem key={color.id} value={color.id}>
-                            <AccordionTrigger>
+                    <TabsContent value="advanced" className="space-y-6 mt-6">
+                      <div className="space-y-6">
+                        {colors.map((color, index) => {
+                          const isSelected = selectedColors.has(color.id);
+                          if (!isSelected) return null;
+                          
+                          return (
+                            <div key={color.id} className="space-y-3">
                               <div className="flex items-center gap-3">
                                 <div
-                                  className="w-6 h-6 rounded border-2 border-border"
+                                  className="w-8 h-8 rounded-xl soft-shadow"
                                   style={{ backgroundColor: color.hex }}
                                 />
-                                <span className="font-mono text-sm">{color.hex}</span>
+                                <Label className="text-sm font-medium">{color.hex}</Label>
                               </div>
-                            </AccordionTrigger>
-                            <AccordionContent>
-                              <div className="space-y-3 pt-2">
-                                <div className="flex items-center justify-between">
-                                  <Label className="text-sm">Position</Label>
-                                  <div className="flex items-center gap-2">
-                                    <Input
-                                      type="number"
-                                      min="0"
-                                      max="100"
-                                      value={stops[colors.indexOf(color)] || 0}
-                                      onChange={(e) => {
-                                        const newStops = [...stops];
-                                        newStops[colors.indexOf(color)] = Number(e.target.value);
-                                        setStops(newStops);
-                                      }}
-                                      className="w-20 text-right"
-                                    />
-                                    <span className="text-sm text-muted-foreground">%</span>
-                                  </div>
-                                </div>
+                              <div className="flex items-center gap-4">
                                 <Slider
-                                  value={[stops[colors.indexOf(color)] || 0]}
-                                  onValueChange={(value) => {
-                                    const newStops = [...stops];
-                                    newStops[colors.indexOf(color)] = value[0];
-                                    setStops(newStops);
-                                  }}
+                                  value={[stops[index] || 0]}
+                                  onValueChange={(value) => updateStop(index, value[0])}
                                   min={0}
                                   max={100}
                                   step={1}
-                                  className="w-full"
+                                  className="flex-1"
                                 />
+                                <div className="w-16 text-sm text-muted-foreground font-medium">
+                                  {stops[index] || 0}%
+                                </div>
                               </div>
-                            </AccordionContent>
-                          </AccordionItem>
-                        ))}
-                      </Accordion>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </TabsContent>
                   </Tabs>
                 </CardContent>
@@ -412,54 +420,46 @@ export default function PrismExtract() {
             )}
 
             {/* CSS Output */}
-            {colors.length > 0 && gradientCSS && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>CSS Code</CardTitle>
-                  <CardDescription>
-                    Copy and paste into your stylesheet
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="relative">
-                    <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-sm font-mono">
-                      <code>background: {gradientCSS};</code>
-                    </pre>
+            {colors.length > 0 && (
+              <Card className="border-0 soft-shadow-lg rounded-3xl overflow-hidden">
+                <CardContent className="p-8">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-primary/10 rounded-2xl">
+                        <Copy className="w-5 h-5 text-primary" />
+                      </div>
+                      <h2 className="text-xl font-semibold">CSS 代码</h2>
+                    </div>
                     <Button
-                      size="sm"
-                      variant="secondary"
-                      className="absolute top-2 right-2"
-                      onClick={copyToClipboard}
+                      onClick={handleCopyCSS}
+                      className="rounded-full"
+                      size="lg"
                     >
-                      <Copy className="w-4 h-4 mr-2" />
-                      Copy
+                      {copied ? (
+                        <>
+                          <Check className="w-4 h-4 mr-2" />
+                          已复制
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-4 h-4 mr-2" />
+                          复制代码
+                        </>
+                      )}
                     </Button>
+                  </div>
+                  
+                  <div className="bg-muted/50 rounded-2xl p-6 font-mono text-sm overflow-x-auto">
+                    <code className="text-foreground">
+                      background: {gradientCSS};
+                    </code>
                   </div>
                 </CardContent>
               </Card>
             )}
-
-            {/* Reset Button */}
-            {colors.length > 0 && (
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={handleReset}
-              >
-                <RotateCw className="w-4 h-4 mr-2" />
-                Start Over
-              </Button>
-            )}
           </div>
         </div>
       </div>
-
-      {/* Footer */}
-      <footer className="border-t border-border mt-16 py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© 2025 Prism-Extract. All processing happens in your browser - your images never leave your device.</p>
-        </div>
-      </footer>
     </div>
   );
 }

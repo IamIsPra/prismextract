@@ -9,26 +9,26 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --radius: 0.5rem;
-    /* SaaS Modern Theme - Primary: #4A90E2 */
-    --background: 210 20% 98%;
-    --foreground: 215 25% 15%;
+    --radius: 1.5rem;
+    /* Modern Soft Theme - Inspired by contemporary UI */
+    --background: 220 25% 97%;
+    --foreground: 220 15% 20%;
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
+    --card-foreground: 220 15% 20%;
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
+    --popover-foreground: 220 15% 20%;
     --primary: 210 79% 58%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 15% 92%;
-    --secondary-foreground: 215 25% 15%;
-    --muted: 210 15% 92%;
-    --muted-foreground: 215 15% 45%;
-    --accent: 210 90% 96%;
+    --secondary: 220 20% 94%;
+    --secondary-foreground: 220 15% 20%;
+    --muted: 220 20% 94%;
+    --muted-foreground: 220 10% 50%;
+    --accent: 210 100% 95%;
     --accent-foreground: 210 79% 58%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
-    --border: 214 20% 88%;
-    --input: 214 20% 88%;
+    --border: 220 15% 90%;
+    --input: 220 15% 90%;
     --ring: 210 79% 58%;
     --chart-1: 210 79% 58%;
     --chart-2: 173 58% 39%;
@@ -36,12 +36,12 @@ All colors MUST be HSL.
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 215 25% 15%;
+    --sidebar-foreground: 220 15% 20%;
     --sidebar-primary: 210 79% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 90% 96%;
+    --sidebar-accent: 210 100% 95%;
     --sidebar-accent-foreground: 210 79% 58%;
-    --sidebar-border: 214 20% 88%;
+    --sidebar-border: 220 15% 90%;
     --sidebar-ring: 210 79% 58%;
   }
 
@@ -88,5 +88,26 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-xl border border-white/20;
+  }
+  
+  .soft-shadow {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+  }
+  
+  .soft-shadow-lg {
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.08);
+  }
+  
+  .gradient-border {
+    position: relative;
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent-foreground))) border-box;
+    border: 2px solid transparent;
   }
 }
