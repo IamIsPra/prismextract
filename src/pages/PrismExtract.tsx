@@ -206,33 +206,32 @@ export default function PrismExtract() {
     <div className="min-h-screen bg-gradient-to-br from-background via-accent/20 to-background">
       {/* Modern Header */}
       <header className="border-b border-border/50 bg-card/50 backdrop-blur-xl">
-        <div className="container mx-auto px-6 py-8">
+        <div className="container mx-auto px-3 lg:px-6 py-4 lg:py-8">
           <div className="flex items-center justify-center gap-4 mb-3">
             <img 
               src="/prism_logo.png" 
               alt="Prism Extract Logo" 
-              className="h-16 w-auto"
+              className="h-24 w-auto"
             />
           </div>
-          <p className="text-center text-muted-foreground text-lg">
+          <p className="text-center text-[#0C0D7A] text-lg">
             Extract colors from images and create beautiful CSS gradients
           </p>
         </div>
       </header>
 
       {/* Main Content */}
-      <div className="container mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
-          {/* Left Column: Upload & Palette */}
-          <div className="space-y-8">
-            {/* Upload Area */}
-            <Card className="border-0 soft-shadow-lg rounded-3xl overflow-hidden">
-              <CardContent className="p-8">
+      <div className={uploadedImage ? "container mx-auto px-6 py-12" : "w-full lg:w-1/2 mx-auto px-6 py-12"}>
+      
+
+        {!uploadedImage ? (
+          <Card className="border-0 soft-shadow-lg rounded-3xl overflow-hidden">
+              <CardContent className="p-2 lg:p-8">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="p-2 bg-primary/10 rounded-2xl">
                     <ImageIcon className="w-5 h-5 text-primary" />
                   </div>
-                  <h2 className="text-xl font-semibold">Upload Image</h2>
+                  <h2 className="text-xl text-[#0C0D7A] font-semibold">Upload Image</h2>
                 </div>
 
                 <div
@@ -253,8 +252,59 @@ export default function PrismExtract() {
                     className="hidden"
                     onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
                   />
+                    <div className="flex flex-col items-center justify-center text-center">
+                      <div className="p-6 bg-primary/10 rounded-full mb-6">
+                        <Upload className="w-12 h-12 text-primary" />
+                      </div>
+                      <p className="text-lg text-foreground font-semibold mb-2">
+                        {isProcessing ? 'Processing...' : 'Click to upload or drag and drop'}
+                      </p>
+                      <p className="text-sm text-muted-foreground text-[#0C0D7A]">
+                        Supports JPG, PNG, GIF, and WebP formats
+                      </p>
+                    </div>
+
+                </div>
+              </CardContent>
+            </Card>
+        ) : (
+          <span></span>
+        )}
+
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
+          {/* Left Column: Upload & Palette */}
+          <div className="space-y-8">
+            {/* Upload Area */}
+            
                   
                   {uploadedImage ? (
+<Card className="border-0 soft-shadow-lg rounded-3xl overflow-hidden">
+              <CardContent className="p-2 lg:p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 bg-primary/10 rounded-2xl">
+                    <ImageIcon className="w-5 h-5 text-primary" />
+                  </div>
+                  <h2 className="text-xl text-[#0C0D7A] font-semibold">Upload Image</h2>
+                </div>
+
+                <div
+                  className={`relative border-2 border-dashed rounded-3xl p-2 lg:p-12 transition-all duration-300 cursor-pointer ${
+                    isDragging
+                      ? 'border-primary bg-primary/5 scale-[0.98]'
+                      : 'border-border hover:border-primary/50 hover:bg-accent/30'
+                  }`}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  onClick={handleUploadClick}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
+                  />
                     <div className="relative group">
                       <img
                         src={uploadedImage}
@@ -265,7 +315,7 @@ export default function PrismExtract() {
                         <Button
                           variant="secondary"
                           size="lg"
-                          className="rounded-full"
+                          className="rounded-full text-[#0C0D7A]"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleReset();
@@ -275,37 +325,28 @@ export default function PrismExtract() {
                         </Button>
                       </div>
                     </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center text-center">
-                      <div className="p-6 bg-primary/10 rounded-full mb-6">
-                        <Upload className="w-12 h-12 text-primary" />
-                      </div>
-                      <p className="text-lg text-foreground font-semibold mb-2">
-                        {isProcessing ? 'Processing...' : 'Click to upload or drag and drop'}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Supports JPG, PNG, GIF, and WebP formats
-                      </p>
-                    </div>
-                  )}
+
                 </div>
               </CardContent>
             </Card>
+                  ) : (
+                    <span></span>
+                  )}
 
             {/* Color Palette */}
             {colors.length > 0 && (
               <Card className="border-0 soft-shadow-lg rounded-3xl overflow-hidden">
-                <CardContent className="p-8">
+                <CardContent className="p-2 lg:p-8">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="p-2 bg-primary/10 rounded-2xl">
                       <Palette className="w-5 h-5 text-primary" />
                     </div>
-                    <h2 className="text-xl font-semibold">Extracted Colors</h2>
+                    <h2 className="text-xl font-semibold text-[#0C0D7A]">Extracted Colors</h2>
                   </div>
 
                   {/* Color Count Selector */}
                   <div className="mb-6 space-y-3">
-                    <Label className="text-sm font-medium">Number of Colors</Label>
+                    <Label className="text-sm font-medium text-[#0C0D7A]">Number of Colors</Label>
                     <div className="flex items-center gap-4">
                       <Slider
                         value={[colorCount]}
@@ -380,12 +421,12 @@ export default function PrismExtract() {
             {/* Gradient Preview */}
             {colors.length > 0 && (
               <Card className="border-0 soft-shadow-lg rounded-3xl overflow-hidden">
-                <CardContent className="p-8">
+                <CardContent className="p-2 lg:p-8">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="p-2 bg-primary/10 rounded-2xl">
                       <Wand2 className="w-5 h-5 text-primary" />
                     </div>
-                    <h2 className="text-xl font-semibold">Gradient Preview</h2>
+                    <h2 className="text-xl font-semibold text-[#0C0D7A]">Gradient Preview</h2>
                   </div>
                   
                   <div
@@ -409,16 +450,16 @@ export default function PrismExtract() {
             {/* Controls */}
             {colors.length > 0 && (
               <Card className="border-0 soft-shadow-lg rounded-3xl overflow-hidden">
-                <CardContent className="p-8">
+                <CardContent className="p-2 lg:p-8">
                   <Tabs defaultValue="basic" className="w-full">
                     <TabsList className="grid w-full grid-cols-2 rounded-2xl p-1 bg-muted/50">
-                      <TabsTrigger value="basic" className="rounded-xl">Basic</TabsTrigger>
-                      <TabsTrigger value="advanced" className="rounded-xl">Advanced</TabsTrigger>
+                      <TabsTrigger value="basic" className="rounded-xl text-[#0C0D7A]">Basic</TabsTrigger>
+                      <TabsTrigger value="advanced" className="rounded-xl text-[#0C0D7A]">Advanced</TabsTrigger>
                     </TabsList>
                     
                     <TabsContent value="basic" className="space-y-6 mt-6">
                       <div className="space-y-3">
-                        <Label className="text-base font-medium">Angle</Label>
+                        <Label className="text-base font-medium text-[#0C0D7A]">Angle</Label>
                         <div className="flex items-center gap-4">
                           <Slider
                             value={[angle]}
@@ -483,13 +524,13 @@ export default function PrismExtract() {
             {/* CSS Output */}
             {colors.length > 0 && (
               <Card className="border-0 soft-shadow-lg rounded-3xl overflow-hidden">
-                <CardContent className="p-8">
-                  <div className="flex items-center justify-between mb-6">
+                <CardContent className="p-2 lg:p-8">
+                  <div className="flex flex-col lg:flex-row items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-primary/10 rounded-2xl">
                         <Copy className="w-5 h-5 text-primary" />
                       </div>
-                      <h2 className="text-xl font-semibold">CSS Code</h2>
+                      <h2 className="text-xl font-semibold text-[#0C0D7A]">CSS Code</h2>
                     </div>
                     <Button
                       onClick={handleCopyCSS}
@@ -511,7 +552,7 @@ export default function PrismExtract() {
                   </div>
                   
                   <div className="bg-muted/50 rounded-2xl p-6 font-mono text-sm overflow-x-auto">
-                    <code className="text-foreground">
+                    <code className="text-foreground text-[#0C0D7A]">
                       background: {gradientCSS};
                     </code>
                   </div>
